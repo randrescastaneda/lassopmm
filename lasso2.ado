@@ -21,11 +21,21 @@ program define lassopmm, eclass byable(recall)
 		numfolds(integer 10)
 		psu(varlist max=1 numeric)
 		seed(integer 12345)
+		mlong
 	];
 #delimit cr
 set more off
 
 qui{
+	
+	//mark sample for use
+	marksample touse
+	
+	// Mark for the other variables in the estimation
+	foreach j of varlist `psu' `uniqid'{
+		replace `touse' = 0 if missing(`j')
+	}
+	
 	tokenize `varlist'
 	// Local for dependent variable
 	local depvar `1'
@@ -35,6 +45,7 @@ qui{
 	local _my_x `*'
 	
 	if ("`sorty'"!="" & "`knn'"!=""){
+		//Only display warning!
 		dis as error "Note that KNN option only works when the default option of PMM is used."
 	}
 	
@@ -44,26 +55,87 @@ qui{
 	else generate `wi' `exp'
 	
 	//Check unique id
-	isid `uniqid'
+	isid `uniqid' 
 	
 	if ("`psu'"==""){
 		sort `uniqid'
 		gen `_group' = 1
 	}
 	else{
-		sort `psu' `uniqid'	
-		clonevar `_group' = psu		
+		sort `psu' `uniqid'
+		clonevar `_group' = `psu'		
 	}
+	
+	mata: st_view(mypsu=.,.,"`_group'", "`touse'")
+	noi: mata: ind = _getmyboot(mypsu,`numsim')	
 	
 	tempfile mydata
 	save `mydata'
 	
-	set seed `seed'
-	if (`numsim'>1){
-		//Get numsim vectors of Y			
+	set seed `seed'	
+	
+	//Get numsim vectors of Y	
+	forval i=1/`numsim'{
+		if (`i'!=1) use `mydata', clear
+			noi:mata: st_view(myvar=., ., "`depvar' `_my_x' `wi'","`touse'")
+			mata: myvar[.,.] = myvar[ind[.,`i'],.]
+		noi:lassoregress `depvar' `_my_x' if `touse'==1 [aw=`wi'], numlambda(`numlambda') numfolds(`numfolds') lambda(`lambda')
+		tempname _beta BB
+		tempvar touse1 touse2
+		
+		mat `_beta' = e(b)
+		
+		gen `touse1' = e(sample)
+		gen `touse2'= `touse1'==0
+	
+		local a=1
+		local chosen
+		foreach x of local _my_x{
+			if (`_beta'[1,`a']!=0){
+				local chosen `chosen' `x'
+				mat `BB' = nullmat(`BB'),`_beta'[1,`a']
+			}
+			local ++a
+		}
+		mat `BB' = `BB',`_beta'[1,`a']
+		
+		foreach x of local chosen{
+			replace `touse2' = 0 if missing(`x')
+		}
+		
+			mata: b = st_matrix("`BB'")
+			mata: st_view(x=., .,"`chosen'", "`touse1'")
+			mata: st_view(y=., .,"`depvar'", "`touse1'")
+			mata: st_view(x1=.,.,"`chosen'", "`touse2'")
+			
+			mata: yhat1 = quadcross((x , J(rows(x),1,1))',b')
+			mata: yhat2 = quadcross((x1,J(rows(x1),1,1))',b')
+	
+		if (`i'==1){
+			if ("`sorty'"=="") mata: y1 = y[_Mpmm(yhat1, yhat2, `knn')]
+			else               mata: y1 = _randomleo(y,yhat2)
+		}
+		else{
+			if ("`mlong'"=="mlong"){
+				if ("`sorty'"=="") mata: y1 = y1 \	y[_Mpmm(yhat1, yhat2, `knn')]
+				else               mata: y1 = y1 \	_randomleo(y,yhat2)
+			}	
+			else{	
+				if ("`sorty'"=="") mata: y1 = y1 \	y[_Mpmm(yhat1, yhat2, `knn')]
+				else               mata: y1 = y1 \	_randomleo(y,yhat2)			
+			}
+		}	
+	}
+	
+	if ("`mlong'"=="mlong"){
+		use `mydata', clear
+		
+		
 		
 	}
-
+	else{
+		use `mydata', clear
+	}	
 }
 end
 
@@ -109,9 +181,20 @@ mata
 		//for(i=1; i<=n; i++) sige2[.,i]=eps[ceil(rows(eps)*runiform(dim,1)),i]
 		return(sige2)	
 	}
-	//Function for replacing the dependent and independent
-	function _getmyboot(_psu, _x, _w){
+	//Function for bootstrapping
+	function _getmyboot(_psu,sim){
+		info = panelsetup(_psu,1)
+		_index = runningsum(J(rows(_psu),1,1))
+		rr = rows(info)
 		
+		for(i=1; i<=rr; i++){
+			m = info[i,1],1 \ info[i,2],1
+			r1= rows(_index[|m|])
+			if (i==1) _X = _f_sampleepsi(sim,r1,_index[|m|])
+			else      _X = _X \ _f_sampleepsi(sim,r1,_index[|m|])
+		}
+		
+		return(_X)
 	}	
 end
 

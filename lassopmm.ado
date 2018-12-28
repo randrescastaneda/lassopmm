@@ -24,6 +24,10 @@ program define lassopmm, eclass byable(recall)
 set more off
 
 qui{
+
+	//mark sample for use
+	marksample touse
+	
 	tokenize `varlist'
 	// Local for dependent variable
 	local depvar `1'
@@ -44,7 +48,7 @@ qui{
 	set seed `seed'
 	
 	//Lasso regress
-	noi:lassoregress `depvar' `_my_x' [aw=`wi'], numlambda(`numlambda') numfolds(`numfolds') lambda(`lambda')
+	noi:lassoregress `depvar' `_my_x' if `touse' [aw=`wi'], numlambda(`numlambda') numfolds(`numfolds') lambda(`lambda')
 	local myvar =  e(varlist_nonzero)
 		tempname _beta BB
 		tempvar touse1 touse2
