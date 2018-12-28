@@ -44,7 +44,7 @@ qui{
 	set seed `seed'
 	
 	//Lasso regress
-	noi:lassoregress `depvar' `_my_x' [aw=weight], numlambda(`numlambda') numfolds(`numfolds') lambda(`lambda')
+	noi:lassoregress `depvar' `_my_x' [aw=`wi'], numlambda(`numlambda') numfolds(`numfolds') lambda(`lambda')
 	local myvar =  e(varlist_nonzero)
 		tempname _beta BB
 		tempvar touse1 touse2
