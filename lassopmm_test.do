@@ -1,7 +1,7 @@
 set more off
 clear all
 
-run "C:\Users\WB378870\OneDrive - WBG\000.my_ados\lassopmm\lasso2.ado"
+run "C:\Users\WB378870\OneDrive - WBG\000.my_ados\lassopmm\lassopmm.ado"
 
 sysuse auto, clear
 
@@ -31,11 +31,17 @@ local _x mpg headroom trunk weight length turn displacement gear_ratio foreign
 //Local with dependent variable
 local _y price 
 
-preserve
-set trace on
-set traced 1
-lassopmm `_y' `_x' [aw=weight], knn(5) numsim(5) psu(psu) seed(12388) uniqid(_numobs11)
-sum `_y' if samples==1
+mi set wide
+
+mi register imputed price 
+
+//mi impute pmm `_y' `_x' [aw=weight], knn(5) add(4)
+
+
+//set trace on
+//set traced 1
+lassopmm `_y' `_x' [aw=weight], sorty knn(5) add(5) psu(psu) seed(12388) uniqid(_numobs11)
+mi estimate: mean price if samples==1 [aw=weight]
 
 sss
 restore 
