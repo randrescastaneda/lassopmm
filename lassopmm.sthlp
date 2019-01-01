@@ -11,7 +11,7 @@
 
 {title:Syntax}
 
-{p 8 17 2}{opt lassoregress}   {depvar} [{indepvars}] {ifin} {weight} {cmd:,} uniqid(varlist) add(integer) [{it:options}]
+{p 8 17 2}{opt lassopmm}   {depvar} [{indepvars}] {ifin} {weight} {cmd:,} uniqid(varlist) add(integer) [{it:options}]
 
 {synoptset 20 tabbed}{...}
 {synoptline}

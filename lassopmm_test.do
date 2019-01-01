@@ -28,6 +28,21 @@ gen _numobs11 = _n
 
 //Local with all candidate variables
 local _x mpg headroom trunk weight length turn displacement gear_ratio foreign
+putmata X=(`_x')
+
+mata
+
+x=quadmeanvariance(X)
+
+x = x[1,.]
+sd = sqrt(x[|2,1/.,.|])
+
+
+
+
+end
+
+
 //Local with dependent variable
 local _y price 
 
