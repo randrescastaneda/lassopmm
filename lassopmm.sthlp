@@ -19,8 +19,8 @@
 {synoptline}
 {syntab:{title:Required}}
 
-{synopt:{opt uniqid()}}varlist of unique identifiers - used to ensure replicability{p_end}
-{synopt:{opt add()}}number of simulations to be run for multiple imputation{p_end}
+{synopt:{opt uniqid(varlist)}}varlist of unique identifiers - used to ensure replicability{p_end}
+{synopt:{opt add(integer)}}number of simulations to be run for multiple imputation{p_end}
 
 {syntab:{title:Optional}}
 

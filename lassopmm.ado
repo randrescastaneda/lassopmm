@@ -133,11 +133,21 @@ qui{
 		
 			mata: b = st_matrix("`BB'")
 			mata: st_view(x=., .,"`chosen'", "`touse1'")
+			mata: st_view(w=., .,"`wi'", "`touse1'")
+			mata: sd = quadmeanvariance(x,w)
+			mata: mu = sd[1,.]
+			mata: sd = sqrt(sd[|2,1/.,.|])			
+			
 			mata: st_view(y=., .,"`depvar'", "`touse1'")
 			mata: st_view(x1=.,.,"`chosen'", "`touse2'")
+			mata: st_view(w1=., .,"`wi'", "`touse2'")
+			mata: sd1 = quadmeanvariance(x1,w1)
+			mata: mu1 = sd1[1,.]
+			mata: sd1 = sqrt(sd1[|2,1/.,.|])
+
 			
-			mata: yhat1 = quadcross((x , J(rows(x),1,1))',b')
-			mata: yhat2 = quadcross((x1,J(rows(x1),1,1))',b')
+			mata: yhat1 = quadcross((((x:-mu):/sd), J(rows(x),1,1))',b')
+			mata: yhat2 = quadcross((((x1:-mu1):/sd1),J(rows(x1),1,1))',b')
 	
 		if (`i'==1){
 			if ("`sorty'"=="") mata: y1 = y[_Mpmm(yhat1, yhat2, `knn')]
