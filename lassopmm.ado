@@ -200,7 +200,7 @@ qui{
 			local a=1
 			local toimp
 			while (`a'<=`add'){
-				gen double _`a'_`depvar' = price if `touse'==1
+				gen double _`a'_`depvar' = `depvar' if `touse'==1
 				
 				local toimp `toimp' _`a'_`depvar'
 				local ++a				

@@ -71,7 +71,7 @@ mi set wide
 
 mi register imputed price 
 
-lassopmm `_y' `_x' [aw=weight], sorty knn(5) add(5) psu(psu) seed(12388) uniqid(_numobs11)
+lassopmm `_y' `_x' [aw=weight], knn(5) add(5) psu(psu) seed(12388) uniqid(_numobs11)
 mi estimate: mean price if samples==1 [aw=weight]
 
 
