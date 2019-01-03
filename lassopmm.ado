@@ -1,5 +1,5 @@
 *! version 0.2 December27-2018
-*! Raul Andres Castaneda - acastaneda@worldbank.org
+*! R. Andres Castaneda - acastaneda@worldbank.org
 *! Paul Corral - pcorralrodas@worldbank.org  -- Corresponding author
 *! Leonardo Lucchetti - llucchetti@worldbank.org
 *! World Bank Group - Poverty and Equity Global Practice 
